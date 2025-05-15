@@ -89,22 +89,35 @@ class DioClient {
   /// Refresh the access token
   Future<String?> _refreshTokenRequest() async {
     try {
-      final response = await dio.post(
+      final refreshToken = await _storage.getToken(
+        tokenKey: LocalStorageConstants.refreshToken,
+      );
+
+      final response = await Dio().post(
         ApiConstants.getToken,
+        options: Options(
+          headers: {
+            'accept': 'application/json; charset=utf-8',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        ),
         data: {
           'grant_type': 'refresh_token',
           'client_id': ApiConstants.clientId,
           'client_secret': ApiConstants.clientSecret,
-          'refresh_token': await _storage.getToken(
-            tokenKey: LocalStorageConstants.refreshToken,
-          ),
+          'refresh_token': '$refreshToken'
         },
       );
-      if (response.data != null && response.data['access'] != null) {
-        final newAccessToken = response.data['access'];
+      if (response.data != null && response.data['access_token'] != null) {
+        final newAccessToken = response.data['access_token'];
+        final newRefresh = response.data['refresh_token'];
         _storage.saveToken(
           tokenKey: LocalStorageConstants.accessToken,
           token: newAccessToken,
+        );
+        await _storage.saveToken(
+          tokenKey: LocalStorageConstants.refreshToken,
+          token: newRefresh,
         );
         dio.options.headers['Authorization'] = 'OAuth $newAccessToken';
       }
@@ -112,7 +125,7 @@ class DioClient {
       return response.data['access_token'];
     } on DioException catch (error) {
       if (kDebugMode) {
-        print('Token refresh error: ${error.response}');
+        print('Token refresh error: ${error.response}, ${error.response?.statusCode}');
       }
       return null;
     } catch (e) {

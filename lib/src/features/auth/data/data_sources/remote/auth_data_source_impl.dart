@@ -24,7 +24,6 @@ class AuthRemoteDataSourceImpl implements AbstractAuthRemoteDataSource {
 
       final tokenResponse = await _tokenExchange(authorizationResponse);
 
-      print('Access Token: ${tokenResponse.accessTokenExpirationDateTime}');
       return {
         'accessToken': tokenResponse.accessToken,
         'refreshToken': tokenResponse.refreshToken,
