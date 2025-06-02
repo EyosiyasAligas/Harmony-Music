@@ -6,8 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:harmony_music/src/features/auth/presentation/screens/home_screen.dart';
 import 'package:harmony_music/src/features/auth/presentation/screens/login_screen.dart';
 
-import '../../core/service_locator/service_locator.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/local_music/music.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -18,38 +17,38 @@ GoRouter getGoRouterOfTheApp({String? initialRoute}) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     debugLogDiagnostics: true,
-    initialLocation: SplashScreen.routeName,
+    initialLocation: MusicScreen.routeName,
     errorBuilder: (context, state) {
       return const Scaffold(body: Center(child: Text('Page not found')));
     },
-    refreshListenable: MarryGoRouterWithBloc(sl<AuthBloc>()),
-    redirect: (context, state) {
-      String? token = sl<AuthBloc>().state.accessToken;
-
-      /// TODO: Prevent redirecting while loading
-      /// Example:
-      /// if (isLoading) {
-      ///   return SplashScreen.routeName;
-      /// }
-
-      if (token == null &&
-          [
-            SplashScreen.routeName,
-            HomeScreen.routeName,
-          ].contains(state.matchedLocation)) {
-        return LoginScreen.routeName;
-      } else if (token != null &&
-          [
-            SplashScreen.routeName,
-            LoginScreen.routeName,
-          ].contains(state.matchedLocation)) {
-        return HomeScreen.routeName;
-      } else {
-        // To display the intended route without redirecting,
-        // return null or the original route path.
-        return null;
-      }
-    },
+    // refreshListenable: MarryGoRouterWithBloc(sl<AuthBloc>()),
+    // redirect: (context, state) {
+    //   String? token = sl<AuthBloc>().state.accessToken;
+    //
+    //   /// TODO: Prevent redirecting while loading
+    //   /// Example:
+    //   /// if (isLoading) {
+    //   ///   return SplashScreen.routeName;
+    //   /// }
+    //
+    //   if (token == null &&
+    //       [
+    //         SplashScreen.routeName,
+    //         HomeScreen.routeName,
+    //       ].contains(state.matchedLocation)) {
+    //     return LoginScreen.routeName;
+    //   } else if (token != null &&
+    //       [
+    //         SplashScreen.routeName,
+    //         LoginScreen.routeName,
+    //       ].contains(state.matchedLocation)) {
+    //     return HomeScreen.routeName;
+    //   } else {
+    //     // To display the intended route without redirecting,
+    //     // return null or the original route path.
+    //     return null;
+    //   }
+    // },
     routes: [
       GoRoute(
         name: SplashScreen.routeName,
@@ -77,6 +76,17 @@ GoRouter getGoRouterOfTheApp({String? initialRoute}) {
         pageBuilder: (context, state) {
           return createCustomTransition(
             child: const HomeScreen(),
+            key: state.pageKey,
+          );
+        },
+      ),
+
+      GoRoute(
+        name: MusicScreen.routeName,
+        path: MusicScreen.routeName,
+        pageBuilder: (context, state) {
+          return createCustomTransition(
+            child: const MusicScreen(),
             key: state.pageKey,
           );
         },
